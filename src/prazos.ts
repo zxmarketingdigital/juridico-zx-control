@@ -77,6 +77,12 @@ export function ehDiaUtil(d: ISODate): boolean {
   return !feriadosNacionais(Number(d.slice(0, 4))).has(d);
 }
 
+/** Dias corridos de `a` até `b` (b - a). Negativo se `b` é anterior a `a`. */
+export function diferencaEmDias(a: ISODate, b: ISODate): number {
+  const MS = 86_400_000;
+  return Math.round((toUTC(b).getTime() - toUTC(a).getTime()) / MS);
+}
+
 /** O próprio dia se útil; senão o próximo dia útil. */
 export function proximoDiaUtil(d: ISODate): ISODate {
   let cur = d;

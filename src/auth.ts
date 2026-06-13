@@ -12,10 +12,12 @@ import { createClient } from "@supabase/supabase-js";
 
 export interface Usuario {
   userId: string;
+  /** Token validado — repassado ao Supabase para que a RLS aplique. */
+  token: string;
 }
 
-/** Valida um token e devolve o usuário, ou null se inválido. */
-export type Verificador = (token: string) => Promise<Usuario | null>;
+/** Valida um token e devolve a identidade, ou null se inválido. */
+export type Verificador = (token: string) => Promise<{ userId: string } | null>;
 
 export interface AuthEnv {
   SUPABASE_URL: string;
@@ -49,7 +51,7 @@ export async function autenticar(
   if (!token) return naoAutorizado();
   const user = await verify(token);
   if (!user) return naoAutorizado();
-  return user;
+  return { userId: user.userId, token };
 }
 
 /** Verificador real: valida o JWT do Supabase Auth (multi-usuário, spec §3). */
