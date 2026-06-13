@@ -27,8 +27,9 @@ Se faltar alguma, oriente a criar (todas têm plano gratuito) antes de seguir.
 ### 1. Supabase — banco + Auth + Storage
 - Peça ao aluno para criar um **projeto** no Supabase. Conduza: "Me manda a **URL do projeto**
   (Settings → API → Project URL)." Guarde em `SUPABASE_URL`.
-- Em seguida, **uma de cada vez**: a **anon key** (`SUPABASE_ANON_KEY`) e a **service key**
-  (`SUPABASE_SERVICE_KEY`, em Settings → API). Explique que a service key é secreta.
+- Em seguida peça a **anon key** (`SUPABASE_ANON_KEY`, em Settings → API) — é pública, pode ser
+  colada à vontade. A **service key** é **opcional** (só se for aplicar migrations via CLI; pelo
+  SQL Editor não precisa) e, se usada, é secreta — nunca commitar.
 - Aplique as migrations de `supabase/migrations/` (cria as tabelas com RLS e o bucket de documentos).
 - Confirme que a RLS ficou habilitada em todas as tabelas.
 

@@ -9,7 +9,7 @@ export const TIMEZONE = "America/Sao_Paulo";
 
 // ── IA: Gemini Flash é o default; provider trocável pelo aluno (spec §2) ──
 export const IA_PROVIDER_DEFAULT = "gemini";
-export const GEMINI_MODEL = "gemini-2.0-flash";
+export const GEMINI_MODEL = "gemini-2.5-flash";
 export const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 /** Retry/timeout do wrapper de IA. */
 export const IA_TIMEOUT_MS = 60_000;
