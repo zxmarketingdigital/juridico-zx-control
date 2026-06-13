@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jurídico ZX Control — Painel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="config.js"></script>
+</head>
+<body>
+  <!-- ── Login (Supabase Auth email/senha; demo aceita qualquer credencial) ── -->
+  <div id="login-view" class="login-wrap">
+    <form class="login-card" id="login-form">
+      <div class="eyebrow">JURÍDICO ZX CONTROL</div>
+      <h1>Acesso do escritório</h1>
+      <label class="field"><span>E-mail</span>
+        <input type="email" id="login-email" required placeholder="advogado@escritorio.adv.br" /></label>
+      <label class="field"><span>Senha</span>
+        <input type="password" id="login-senha" required placeholder="••••••••" /></label>
+      <button type="submit" class="btn btn-primary" style="width:100%">Entrar</button>
+      <div class="login-err" id="login-err"></div>
+    </form>
+  </div>
+
+  <!-- ── App ──────────────────────────────────────────────────────────── -->
+  <div id="app-view" class="hidden">
+    <header class="topbar">
+      <h1>JURÍDICO_ZX<span class="cursor">_</span></h1>
+      <span class="spacer"></span>
+      <span class="user-chip"><span class="statusdot"></span><span id="user-email"></span></span>
+      <button class="btn btn-sm" id="logout-btn">Sair</button>
+    </header>
+
+    <div class="shell">
+      <nav class="side">
+        <div class="eyebrow">Agentes de IA</div>
+        <button class="navpill active" data-view="agentes">⚖️ Agentes</button>
+        <div class="eyebrow">Cadastros</div>
+        <button class="navpill" data-view="clientes">Clientes</button>
+        <button class="navpill" data-view="casos">Casos / Processos</button>
+        <button class="navpill" data-view="documentos">Documentos</button>
+        <button class="navpill" data-view="prazos">Agenda de Prazos</button>
+        <button class="navpill" data-view="pecas_geradas">Peças Geradas</button>
+      </nav>
+
+      <main class="content">
+        <!-- Agentes -->
+        <section class="page" data-page="agentes">
+          <div class="page-head"><h2>Agentes de IA</h2></div>
+          <div class="cards" id="agent-cards"></div>
+        </section>
+
+        <!-- Clientes -->
+        <section class="page hidden" data-page="clientes">
+          <div class="page-head"><h2>Clientes</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="clientes">+ Novo cliente</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Nome</th><th>Contato</th><th>CPF/CNPJ</th><th></th>
+          </tr></thead><tbody id="tb-clientes"></tbody></table></div>
+        </section>
+
+        <!-- Casos -->
+        <section class="page hidden" data-page="casos">
+          <div class="page-head"><h2>Casos / Processos</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="casos">+ Novo caso</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Nº do processo</th><th>Cliente</th><th>Área</th><th>Status</th><th></th>
+          </tr></thead><tbody id="tb-casos"></tbody></table></div>
+        </section>
+
+        <!-- Documentos -->
+        <section class="page hidden" data-page="documentos">
+          <div class="page-head"><h2>Documentos</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="documentos">+ Novo documento</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Nome</th><th>Caso</th><th>Tipo</th><th></th>
+          </tr></thead><tbody id="tb-documentos"></tbody></table></div>
+        </section>
+
+        <!-- Prazos / Agenda -->
+        <section class="page hidden" data-page="prazos">
+          <div class="page-head"><h2>Agenda de Prazos</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="prazos">+ Novo prazo</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Tipo</th><th>Caso</th><th>Publicação</th><th>Data fatal</th><th>Situação</th><th></th>
+          </tr></thead><tbody id="tb-prazos"></tbody></table></div>
+        </section>
+
+        <!-- Peças geradas -->
+        <section class="page hidden" data-page="pecas_geradas">
+          <div class="page-head"><h2>Peças Geradas</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="pecas_geradas">+ Nova peça</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Agente</th><th>Tipo</th><th>Caso</th><th>Data</th><th></th>
+          </tr></thead><tbody id="tb-pecas_geradas"></tbody></table></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <script src="app.js"></script>
+</body>
+</html>
