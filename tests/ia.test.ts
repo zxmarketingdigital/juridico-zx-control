@@ -1,9 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   DISCLAIMER,
   comDisclaimer,
   INSTRUCAO_BASE,
   executarComRetry,
+  geminiProvider,
 } from "../src/ia";
 
 describe("disclaimer obrigatório em todo output de IA (spec §7.1)", () => {
@@ -21,6 +22,29 @@ describe("disclaimer obrigatório em todo output de IA (spec §7.1)", () => {
     const once = comDisclaimer("x");
     const twice = comDisclaimer(once);
     expect(twice.split(DISCLAIMER).length - 1).toBe(1);
+  });
+
+  // Invariante de INTEGRAÇÃO (não-teatro): o provider real DEVE anexar o
+  // disclaimer no output que volta do modelo. Se alguém trocar
+  // `return comDisclaimer(texto)` por `return texto` em ia.ts, este teste
+  // fica vermelho — exatamente o que o teste isolado de comDisclaimer não pega.
+  it("o provider Gemini sempre anexa o disclaimer ao output do modelo", async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          candidates: [{ content: { parts: [{ text: "Análise sem aviso nenhum." }] } }],
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const out = await geminiProvider({ GEMINI_API_KEY: "k" }).gerar({ prompt: "x" });
+      expect(out).toContain("Análise sem aviso nenhum.");
+      expect(out).toContain(DISCLAIMER);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 

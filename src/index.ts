@@ -8,7 +8,7 @@
 
 import { autenticar, verificadorSupabase, type Usuario } from "./auth";
 import { dbDoUsuario } from "./db";
-import { VALIDADORES } from "./validacao";
+import { VALIDADORES, VALIDADORES_UPDATE } from "./validacao";
 import { TABLES, type Table } from "./schema";
 import {
   AGENTE_DEFS,
@@ -141,8 +141,15 @@ async function crud(
     case "PATCH": {
       if (!id) return erro("id_obrigatorio", 400);
       const body = await req.json().catch(() => null);
-      if (!body || typeof body !== "object") return erro("entrada_invalida", 422);
-      const { data, error } = await db.from(tabela).update(body).eq("id", id).select().single();
+      // Valida e descarta campos fora do schema (anti mass-assignment).
+      const parsed = VALIDADORES_UPDATE[tabela].safeParse(body);
+      if (!parsed.success) return erro("entrada_invalida", 422);
+      const { data, error } = await db
+        .from(tabela)
+        .update(parsed.data as Record<string, unknown>)
+        .eq("id", id)
+        .select()
+        .single();
       if (error) return erro("falha_atualizacao", 400);
       return json(data);
     }
@@ -208,19 +215,22 @@ async function postAgente(
   // Histórico do output (toda peça gerada é gravada, nunca só na tela — §5).
   // Triagem pode vincular a um cliente/lead já cadastrado (guardado em metadata).
   const metadata = corpo.vinculo ? { vinculo: corpo.vinculo } : {};
-  await db.from("pecas_geradas").insert({
+  const { error: errPeca } = await db.from("pecas_geradas").insert({
     caso_id: corpo.caso_id ?? null,
     agente: idAgente,
     tipo: (corpo.entrada?.tipo as string) ?? (corpo.entrada?.formato as string) ?? null,
     conteudo,
     metadata,
   });
+  // Falha-fechado: se o histórico não gravou, não diga ao usuário que gravou.
+  if (errPeca) return erro("falha_gravar_peca", 500);
 
   // Extrator: grava o prazo na agenda (caminho grava-vs-lê).
   let prazoGravado = null;
   if (idAgente === "extrator_prazos" && corpo.prazo) {
     const row = montarPrazo(corpo.prazo, corpo.caso_id ?? null);
-    const { data } = await db.from("prazos").insert(row).select().single();
+    const { data, error: errPrazo } = await db.from("prazos").insert(row).select().single();
+    if (errPrazo) return erro("falha_gravar_prazo", 500);
     prazoGravado = data ?? row;
   }
 
@@ -289,13 +299,14 @@ async function postDataJud(req: Request, env: Env, user: Usuario): Promise<Respo
         "linha do tempo, situação atual e próximos passos. Não cite jurisprudência.\n\n" +
         textoDoProcesso(processo),
     });
-    await db.from("pecas_geradas").insert({
+    const { error: errResumo } = await db.from("pecas_geradas").insert({
       caso_id: corpo.caso_id ?? null,
       agente: "resumidor_processos",
       tipo: "Resumo DataJud",
       conteudo: resumo,
       metadata: { fonte: "datajud", numero: processo.numero },
     });
+    if (errResumo) return erro("falha_gravar_resumo", 500);
   }
 
   return json({ ...processo, salvos, resumo }, 200);

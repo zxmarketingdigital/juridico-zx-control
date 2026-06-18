@@ -90,3 +90,16 @@ export const VALIDADORES: Record<Table, z.ZodType> = {
   custos: custoCreate,
   pre_notas: preNotaCreate,
 };
+
+/**
+ * Validadores de UPDATE (PATCH): os MESMOS schemas, todos os campos opcionais.
+ * Derivado de VALIDADORES (um valor, um lugar — não duplica regra). Como o zod
+ * descarta chaves desconhecidas, o PATCH passa a bloquear mass-assignment
+ * (ex.: `created_at`/`id` forjados no body são removidos, não gravados).
+ */
+export const VALIDADORES_UPDATE: Record<Table, z.ZodType> = Object.fromEntries(
+  Object.entries(VALIDADORES).map(([k, v]) => {
+    const obj = v as unknown as { partial: () => z.ZodType };
+    return [k, obj.partial()];
+  }),
+) as Record<Table, z.ZodType>;
