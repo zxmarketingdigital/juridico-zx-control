@@ -118,3 +118,5 @@ pnpm typecheck          # tsc src + tests
 pnpm ci                 # typecheck + testes + wrangler dry-run (tem que passar antes do PR)
 pnpm dev                # wrangler dev local
 ```
+
+> **Histórico de sessões:** ver `HISTORICO-SESSOES.md` na raiz.
