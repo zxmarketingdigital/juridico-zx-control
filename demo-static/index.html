@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jurídico CD Tech — Painel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="tour.css" />
+  <script src="config.js"></script>
+</head>
+<body>
+  <!-- ── Login (Supabase Auth email/senha; demo aceita qualquer credencial) ── -->
+  <div id="login-view" class="login-wrap">
+    <form class="login-card" id="login-form" autocomplete="off">
+      <div class="eyebrow">JURÍDICO CD TECH</div>
+      <h1>Acesso do escritório</h1>
+      <label class="field"><span>E-mail</span>
+        <input type="email" id="login-email" required placeholder="advogado@escritorio.adv.br" autocomplete="off" /></label>
+      <label class="field"><span>Senha</span>
+        <input type="password" id="login-senha" required placeholder="••••••••" autocomplete="new-password" /></label>
+      <button type="submit" class="btn btn-primary" style="width:100%">Entrar</button>
+      <div class="login-err" id="login-err"></div>
+    </form>
+  </div>
+
+  <!-- ── App ──────────────────────────────────────────────────────────── -->
+  <div id="app-view" class="hidden">
+    <header class="topbar">
+      <h1>JURÍDICO<span class="cursor">_</span></h1>
+      <span class="spacer"></span>
+      <span class="user-chip"><span class="statusdot"></span><span id="user-email"></span></span>
+      <button class="btn btn-sm" id="logout-btn">Sair</button>
+    </header>
+
+    <div class="shell">
+      <nav class="side">
+        <div class="eyebrow">Agentes de IA</div>
+        <button class="navpill active" data-view="agentes">⚖️ Agentes</button>
+        <div class="eyebrow">Cadastros</div>
+        <button class="navpill" data-view="clientes">Clientes</button>
+        <button class="navpill" data-view="advogados">Equipe</button>
+        <button class="navpill" data-view="casos">Casos / Processos</button>
+        <button class="navpill" data-view="documentos">Documentos</button>
+        <button class="navpill" data-view="prazos">Agenda de Prazos</button>
+        <button class="navpill" data-view="pecas_geradas">Peças Geradas</button>
+        <button class="navpill" data-view="roteiros">Roteiros Gerados</button>
+        <div class="eyebrow">Crescimento</div>
+        <button class="navpill" data-view="growth">💰 Financeiro</button>
+        <button class="navpill" data-view="crm">🎯 CRM</button>
+      </nav>
+
+      <main class="content">
+        <!-- Agentes -->
+        <section class="page" data-page="agentes">
+          <div class="page-head"><h2>Agentes de IA</h2></div>
+          <div class="cards" id="agent-cards"></div>
+        </section>
+
+        <!-- Clientes -->
+        <section class="page hidden" data-page="clientes">
+          <div class="page-head"><h2>Clientes</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="clientes">+ Novo cliente</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Nome</th><th>Contato</th><th>CPF/CNPJ</th><th></th>
+          </tr></thead><tbody id="tb-clientes"></tbody></table></div>
+        </section>
+
+        <!-- Equipe (advogados) -->
+        <section class="page hidden" data-page="advogados">
+          <div class="page-head"><h2>Equipe</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="advogados">+ Novo advogado</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Nome</th><th>OAB</th><th>E-mail</th><th></th>
+          </tr></thead><tbody id="tb-advogados"></tbody></table></div>
+        </section>
+
+        <!-- Casos -->
+        <section class="page hidden" data-page="casos">
+          <div class="page-head"><h2>Casos / Processos</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="casos">+ Novo caso</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Nº do processo</th><th>Cliente</th><th>Área</th><th>Status</th><th></th>
+          </tr></thead><tbody id="tb-casos"></tbody></table></div>
+        </section>
+
+        <!-- Documentos -->
+        <section class="page hidden" data-page="documentos">
+          <div class="page-head"><h2>Documentos</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="documentos">+ Novo documento</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Nome</th><th>Caso</th><th>Tipo</th><th></th>
+          </tr></thead><tbody id="tb-documentos"></tbody></table></div>
+        </section>
+
+        <!-- Prazos / Agenda -->
+        <section class="page hidden" data-page="prazos">
+          <div class="page-head"><h2>Agenda de Prazos</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="prazos">+ Novo prazo</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Tipo</th><th>Caso</th><th>Publicação</th><th>Data fatal</th><th>Situação</th><th></th>
+          </tr></thead><tbody id="tb-prazos"></tbody></table></div>
+        </section>
+
+        <!-- Peças geradas -->
+        <section class="page hidden" data-page="pecas_geradas">
+          <div class="page-head"><h2>Peças Geradas</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="pecas_geradas">+ Novo registro</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Agente</th><th>Tipo</th><th>Caso</th><th>Data</th><th></th>
+          </tr></thead><tbody id="tb-pecas_geradas"></tbody></table></div>
+        </section>
+
+        <!-- Roteiros gerados -->
+        <section class="page hidden" data-page="roteiros">
+          <div class="page-head"><h2>Roteiros Gerados</h2></div>
+          <p class="sub" style="color:var(--text-secondary);margin-bottom:14px">Roteiros do agente “Roteirista de Conteúdo” — salvos automaticamente. Clique em “Ver” para copiar.</p>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Data</th><th>Formato</th><th>Abertura</th><th></th>
+          </tr></thead><tbody id="tb-roteiros"></tbody></table></div>
+        </section>
+
+        <!-- CRM -->
+        <section class="page hidden" data-page="crm">
+          <div class="page-head"><h2>CRM — pipeline de leads</h2><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="leads">+ Novo lead</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Nome</th><th>Contato</th><th>Origem</th><th>Etapa</th><th></th>
+          </tr></thead><tbody id="tb-leads"></tbody></table></div>
+        </section>
+
+        <!-- Financeiro -->
+        <section class="page hidden" data-page="growth">
+          <div class="page-head"><h2>Financeiro</h2></div>
+          <div class="cards" id="growth-cards"></div>
+
+          <div class="page-head" style="margin-top:26px"><h3 style="margin:0">Receitas</h3><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="receitas">+ Nova receita</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Descrição</th><th>Cliente</th><th>Valor</th><th>Tipo</th><th></th>
+          </tr></thead><tbody id="tb-receitas"></tbody></table></div>
+
+          <div class="page-head" style="margin-top:26px"><h3 style="margin:0">Registro de custos</h3><span class="spacer"></span>
+            <button class="btn btn-primary" data-novo="custos">+ Novo custo</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Descrição</th><th>Valor</th><th>Tipo</th><th></th>
+          </tr></thead><tbody id="tb-custos"></tbody></table></div>
+
+          <div class="page-head" style="margin-top:26px"><h3 style="margin:0">Pré-notas</h3><span class="spacer"></span>
+            <button class="btn btn-primary" id="btn-pre-nota">Gerar pré-nota</button></div>
+          <div class="tbl-wrap"><table><thead><tr>
+            <th>Número</th><th>Cliente</th><th>Serviço</th><th>Valor</th><th></th>
+          </tr></thead><tbody id="tb-pre_notas"></tbody></table></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <footer class="demo-footer">Ambiente de demonstração — dados fictícios</footer>
+  <script src="data.js"></script>
+  <script src="mock-api.js"></script>
+  <script src="app.js"></script>
+  <script src="tour.js"></script>
+  <script>
+    if (window.ZX && window.ZX.DEMO) {
+      document.getElementById('login-email').value = 'demo@cd-tech.com.br';
+      document.getElementById('login-senha').value = 'demo1234';
+      document.getElementById('login-form').dispatchEvent(new Event('submit'));
+    }
+  </script>
+
+  <div id="mobile-overlay" style="
+    display:none;position:fixed;inset:0;z-index:9999;
+    background:#0a0a0f;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:32px;font-family:Inter,sans-serif;color:#f4f4f5;">
+    <div style="font-size:56px;margin-bottom:24px;animation:rotate-hint 1.8s ease-in-out infinite;">📱</div>
+    <h2 style="font-size:1.2rem;font-weight:700;margin:0 0 12px;">Gire o celular</h2>
+    <p style="font-size:.9rem;color:#a1a1aa;margin:0 0 32px;max-width:260px;line-height:1.5;">
+      Este painel foi desenvolvido para estações de trabalho.<br>
+      Vire o celular na <strong style="color:#f4f4f5;">posição horizontal</strong> para navegar melhor.
+    </p>
+    <button onclick="document.getElementById('mobile-overlay').style.display='none'" style="
+      background:transparent;border:1px solid #3f3f46;color:#a1a1aa;
+      padding:10px 24px;border-radius:8px;font-size:.85rem;cursor:pointer;">Ver mesmo assim</button>
+  </div>
+  <div id="inapp-banner" style="
+    display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;
+    background:#18181b;border:1px solid #3f3f46;border-radius:12px;padding:14px 16px;
+    font-family:Inter,sans-serif;color:#f4f4f5;box-shadow:0 8px 24px rgba(0,0,0,.4);
+    align-items:center;gap:12px;">
+    <span style="font-size:1.3rem;">💡</span>
+    <span style="font-size:.82rem;color:#d4d4d8;line-height:1.4;flex:1;">
+      Pra melhor experiência (tela cheia e paisagem), toque em <strong style="color:#f4f4f5;">⋯</strong> e escolha <strong style="color:#f4f4f5;">"Abrir no navegador"</strong>.
+    </span>
+    <button onclick="document.getElementById('inapp-banner').style.display='none'" style="
+      background:transparent;border:none;color:#a1a1aa;font-size:1rem;cursor:pointer;padding:4px;">✕</button>
+  </div>
+  <style>@keyframes rotate-hint{0%,100%{transform:rotate(0deg)}40%,60%{transform:rotate(90deg)}}</style>
+  <script>
+    (function(){
+      var o=document.getElementById('mobile-overlay');
+      var b=document.getElementById('inapp-banner');
+      var inApp=/Instagram|FBAN|FBAV|FB_IAB|Line\/|TikTok|MicroMessenger/i.test(navigator.userAgent);
+      function c(){if(inApp){o.style.display='none';b.style.display='flex';return;}var m=window.innerWidth<900||('ontouchstart' in window&&screen.width<900);o.style.display=(m&&window.innerHeight>window.innerWidth)?'flex':'none';}
+      c();window.addEventListener('resize',c);window.addEventListener('orientationchange',function(){setTimeout(c,300);});
+    })();
+  </script>
+</body>
+</html>
