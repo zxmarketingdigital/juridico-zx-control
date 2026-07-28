@@ -8,6 +8,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <script src="config.js"></script>
+  <!-- Demo pública: marca o <html> ANTES do 1º paint pra o painel já abrir aberto,
+       sem flash da tela de login (regras em style.css, bloco "Demo pública").
+       Em produção config.js não define DEMO → nada aqui roda e o estado inicial
+       do documento continua sendo o de login. -->
+  <script>if (window.ZX && window.ZX.DEMO) document.documentElement.classList.add("zx-demo");</script>
 </head>
 <body>
   <!-- ── Login (Supabase Auth email/senha; demo aceita qualquer credencial) ── -->

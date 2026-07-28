@@ -65,6 +65,13 @@ async function login(email, senha) {
 }
 
 function sair() {
+  // Demo pública: sair do modo demo ANTES de reexibir o login. Sem tirar a classe,
+  // as regras de html.zx-demo (style.css) mantêm o #login-view em display:none e o
+  // visitante ficaria preso num shell logado, só emitindo toasts de erro, sem tela
+  // de acesso e sem botão "Sair" (escondido por CSS). É o que aconteceria com um
+  // 401 vindo DEPOIS do boot — quando o .catch da auto-entrada já resolveu.
+  // Em produção (ZX.DEMO undefined) a classe nunca existe: logout normal, fail-closed.
+  if (ZX.DEMO) document.documentElement.classList.remove("zx-demo");
   TOKEN = null;
   $("#app-view").classList.add("hidden");
   $("#login-view").classList.remove("hidden");
@@ -528,3 +535,18 @@ $("#login-form").onsubmit = async (e) => {
     iniciarApp(u.email);
   } catch (err) { $("#login-err").textContent = err.message; }
 };
+
+// ── Demo pública: entra direto, sem login ────────────────────────────────
+// Guardado por ZX.DEMO (só o config.js da demo define isso; em produção é
+// undefined e este bloco inteiro é pulado — a auth do produto não muda).
+// O <form> de login continua no DOM como fallback silencioso: se o auto-login
+// falhar, sair() tira .zx-demo do <html> (o que reexibe login e o botão "Sair")
+// e o visitante ainda consegue entrar pela tela normal. Reusar sair() aqui é o
+// que garante que o MESMO caminho de volta valha em qualquer momento do ciclo de
+// vida — inclusive num 401 tardio, muito depois deste .catch já ter resolvido.
+if (ZX.DEMO) {
+  Promise.resolve()
+    .then(() => login("", ""))
+    .then(() => iniciarApp("Demonstração"))
+    .catch(() => sair());
+}

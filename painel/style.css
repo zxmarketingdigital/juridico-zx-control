@@ -40,6 +40,16 @@ body {
 a { color: var(--primary-light); text-decoration: none; }
 .hidden { display: none !important; }
 
+/* ── Demo pública (html.zx-demo) ──────────────────────────────────────────
+   Só existe quando config.js traz DEMO:true (demo hospedada / demo local).
+   Em produção a classe nunca é aplicada e nada abaixo tem efeito.
+   Abre já no painel, sem flash do login, e some com o "Sair" (não faz sentido
+   numa demonstração). O <form> de login continua no DOM: se o auto-login do
+   app.js falhar, ele tira .zx-demo do <html> e a tela de acesso reaparece. */
+html.zx-demo #login-view { display: none !important; }
+html.zx-demo #app-view.hidden { display: block !important; }
+html.zx-demo #logout-btn { display: none !important; }
+
 /* ── Header sticky ───────────────────────────────────────────────────── */
 header.topbar {
   position: sticky; top: 0; z-index: 20;
