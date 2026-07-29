@@ -1,8 +1,8 @@
 # 🏠 Comece aqui — Colaborador (Jurídico ZX Control)
 
-Você vai ajudar a construir um produto: um mini sistema com login e 5 agentes de IA que ajudam
+Você vai ajudar a construir um produto: um mini sistema com login e 6 agentes de IA que ajudam
 advogados nas tarefas burocráticas do dia a dia (analisar contratos, gerar minutas, resumir
-processos, controlar prazos, triar clientes). **Não precisa saber programar** — quem escreve o código é a IA (o Claude). Seu papel é
+processos, controlar prazos, triar clientes, criar roteiros para as redes). **Não precisa saber programar** — quem escreve o código é a IA (o Claude). Seu papel é
 **conduzir, testar e enviar o trabalho pro Rafael aprovar**. É mais simples do que parece.
 
 ## Parte 1 — Preparação (só uma vez)
