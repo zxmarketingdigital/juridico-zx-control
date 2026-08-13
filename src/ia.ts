@@ -81,17 +81,19 @@ export interface ProvedorIA {
 
 export interface IAEnv {
   GEMINI_API_KEY: string;
+  GEMINI_MODEL?: string;
 }
 
 /** Provider padrão: Gemini Flash via REST, multimodal inline, retry+timeout. */
 export function geminiProvider(env: IAEnv): ProvedorIA {
+  const model = env.GEMINI_MODEL ?? GEMINI_MODEL;
   return {
     async gerar({ prompt, documentos }) {
       const parts: unknown[] = [{ text: prompt }];
       for (const d of documentos ?? []) {
         parts.push({ inline_data: { mime_type: d.mime, data: d.dados } });
       }
-      const url = `${GEMINI_BASE_URL}/models/${GEMINI_MODEL}:generateContent?key=${env.GEMINI_API_KEY}`;
+      const url = `${GEMINI_BASE_URL}/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`;
       const body = JSON.stringify({
         system_instruction: { parts: [{ text: INSTRUCAO_BASE }] },
         contents: [{ role: "user", parts }],
