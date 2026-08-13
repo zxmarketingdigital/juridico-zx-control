@@ -86,7 +86,9 @@ export interface IAEnv {
 
 /** Provider padrão: Gemini Flash via REST, multimodal inline, retry+timeout. */
 export function geminiProvider(env: IAEnv): ProvedorIA {
-  const model = env.GEMINI_MODEL ?? GEMINI_MODEL;
+  // `||` e trim (não `??`): GEMINI_MODEL vazio no ambiente tem que cair na constante da linha,
+  // senão a URL sai sem modelo e toda chamada de IA quebra.
+  const model = env.GEMINI_MODEL?.trim() || GEMINI_MODEL;
   return {
     async gerar({ prompt, documentos }) {
       const parts: unknown[] = [{ text: prompt }];
@@ -109,10 +111,12 @@ export function geminiProvider(env: IAEnv): ProvedorIA {
           });
           if (!resp.ok) throw new Error(`IA HTTP ${resp.status}`);
           const json = (await resp.json()) as {
-            candidates?: { content?: { parts?: { text?: string }[] } }[];
+            candidates?: { content?: { parts?: { text?: string; thought?: boolean }[] } }[];
           };
+          // part com thought:true é o raciocínio interno do modelo — nunca vai pro advogado.
           const out = json.candidates?.[0]?.content?.parts
-            ?.map((p) => p.text ?? "")
+            ?.filter((p) => p.thought !== true)
+            .map((p) => p.text ?? "")
             .join("");
           if (!out) throw new Error("IA sem resposta");
           return out;
