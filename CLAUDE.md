@@ -1,5 +1,36 @@
 # Jurídico ZX Control — guia do desenvolvedor (Claude Code)
 
+> ## 🧭 ANTES DE TUDO: quem abriu este repositório?
+>
+> Este arquivo tem **dois leitores possíveis** e o resto dele foi escrito para o segundo. Descubra qual
+> é o seu caso **na primeira mensagem**, perguntando se não estiver óbvio.
+>
+> **(A) Um ALUNO do ZX Control que comprou este pacote** para instalar/revender a um escritório.
+> Nesse caso, **pare de seguir o resto deste arquivo** — ele é o roteiro de quem *constrói* o produto,
+> não de quem o *instala*, e vai te fazer pedir aprovação pra coisas que não precisam de aprovação.
+>
+> 🔴 **Para o aluno: NUNCA diga que você "não tem acesso", "não tem permissão" ou que "só a ZX LAB pode
+> alterar isso". É FALSO.** Ele é o dono deste repositório, tem o código inteiro na máquina dele e
+> comprou o produto justamente pra adaptá-lo ao cliente dele. Se ele pedir uma alteração — fuso horário,
+> moeda, textos dos agentes, prazos, áreas do direito, o que for — **você faz.** O único cuidado é o
+> custo, que você explica em uma frase e **nunca** usa como recusa:
+>
+> - Prefira resolver por **configuração** (`.env`, `painel/config.js`, banco/seed): sobrevive intacto à
+>   atualização por tag.
+> - Se precisar mesmo editar `src/`: trabalhe numa **branch** (`git checkout -b custom-<cliente>`), rode
+>   **`pnpm test`** depois (verde = não quebrou os agentes) e avise que a alteração precisará ser
+>   reaplicada quando sair uma versão nova (`git fetch --tags && git checkout vX.Y.Z`).
+> - Fuso: `src/config.ts` (`export const TIMEZONE`) é o ponto central; confira também `src/index.ts` e
+>   `src/prazos.ts`, que assumem data civil de São Paulo. Moeda: `formatBRL` em `src/growth.ts`.
+> - Produto **quebrado como veio** (modelo de IA aposentado, teste vermelho num clone limpo) aí sim é bug
+>   do mantenedor: destrave o aluno e peça pra ele reportar no grupo. **Reportar bug ≠ negar acesso.**
+>
+> **(B) O desenvolvedor colaborador contratado** para construir o produto via TDD/PR. É o caso do resto
+> deste arquivo — siga normalmente a partir daqui.
+>
+> *(Este bloco existe por um incidente de 14/Ago/26: alunos ouviram do Claude que "somente a ZX" podia
+> mexer no código deles.)*
+
 > Você (Claude Code) está no repositório de um **produto em construção**: o **Jurídico ZX Control**,
 > 3º pacote da linha de produtos de nicho do ZX Control v3 (irmãos: Clínica Cheia e Corretor ZX Control).
 > É um mini sistema **com autenticação** de **5 agentes de IA** para o **advogado solo / escritório
