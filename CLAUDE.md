@@ -33,9 +33,9 @@
 
 > Você (Claude Code) está no repositório de um **produto em construção**: o **Jurídico ZX Control**,
 > 3º pacote da linha de produtos de nicho do ZX Control v3 (irmãos: Clínica Cheia e Corretor ZX Control).
-> É um mini sistema **com autenticação** de **5 agentes de IA** para o **advogado solo / escritório
+> É um mini sistema **com autenticação** de **6 agentes de IA** para o **advogado solo / escritório
 > pequeno**: ele faz login, passa informações ou sobe documentos, e a IA processa e gera o resultado
-> (análise de contrato, minuta, resumo de processo, prazo, ficha de triagem). O dono deste repo é um
+> (análise de contrato, minuta, resumo de processo, prazo, ficha de triagem, roteiro). O dono deste repo é um
 > **desenvolvedor colaborador** contratado pra construir o produto. O ZX LAB (Rafael,
 > `@zxmarketingdigital`) revisa e publica.
 
@@ -57,7 +57,7 @@ Mas dentro de regras firmes:
 4. **PR pequeno e escopado.** Um PR por unidade coerente (um agente, o schema, o auth…). `pnpm ci`
    tem que passar local antes de abrir. PR ≤ ~1.000 linhas de diff.
 
-## Os 5 agentes (spec §4)
+## Os 6 agentes (spec §4)
 
 1. **Analisador de Contratos** — upload PDF/DOCX → riscos, cláusulas abusivas/faltantes, sugestões de
    redação, semáforo por cláusula.
@@ -67,6 +67,20 @@ Mas dentro de regras firmes:
 4. **Extrator de Prazos** — intimação/publicação → prazo + data fatal em dias úteis + grava na agenda.
 5. **Triagem de Cliente** — relato em texto → ficha do caso, área do direito, documentos necessários,
    viabilidade preliminar.
+6. **Roteirista de Conteúdo** — tema + formato (reel/carrossel) + CTA → roteiro em 4 blocos
+   (HOOK / DESENVOLVIMENTO / AMPLIFICAÇÃO / CTA), com trava ética da OAB no prompt. Único agente
+   voltado a **captação**, não à execução do trabalho jurídico.
+
+Lista canônica em `src/schema.ts` (`AGENTES`) + `src/agentes.ts` (`AGENTE_DEFS`). **Agente novo entra
+nos dois arquivos E no spec §4** — foi exatamente essa a falha do PR #2, que deixou o spec dizendo 5
+por ~6 semanas enquanto o código já tinha 6.
+
+## Além dos agentes (spec §11 — incorporado pelo PR #2)
+
+- **DataJud (§11.1)** — consulta ao CNJ por número CNJ, botão na linha do Caso. **Não é agente.**
+- **Equipe (§11.2)** — `advogados` + Edge Function `criar-acesso` (valida o chamador no código, não
+  confia no `verify_jwt`).
+- **Financeiro/CRM (§11.3)** — `leads` (funil), `receitas`, `custos`, `pre_notas`, `GET /growth`.
 
 ## Regras inquebráveis (saem do spec — não negocie)
 
@@ -83,6 +97,9 @@ Mas dentro de regras firmes:
 - **Proibido o prompt pedir/citar jurisprudência ou julgados específicos** (números de processo,
   ementas, precedentes nomeados). Alucinação de julgado é risco profissional grave pro advogado.
   Pesquisa de jurisprudência está explicitamente FORA da v1 (spec §7.2 e §10).
+  **Isso não veda o DataJud (§11.1):** consultar a API oficial do CNJ pelo número do processo DO
+  PRÓPRIO CLIENTE é dado factual, não precedente inventado. Régua: **fonte oficial consultada por
+  identificador = ok; julgado produzido pelo modelo = proibido.**
 - **Prazos sempre em dias úteis, timezone America/Sao_Paulo, com feriados nacionais.** Função pura
   testada (Vitest) com casos de feriado no meio e prazo caindo em fim de semana. Nunca UTC, nunca
   data corrida.

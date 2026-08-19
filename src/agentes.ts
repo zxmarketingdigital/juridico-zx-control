@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════════
-// Os 5 agentes (spec §4). Cada agente: título + construtor de prompt. Nenhum
+// Os 6 agentes (spec §4). Cada agente: título + construtor de prompt. Nenhum
 // prompt pede jurisprudência/julgados (spec §7.2 — INSTRUCAO_BASE reforça).
 // O disclaimer é anexado pelo wrapper de IA (src/ia.ts) em todo output.
 //

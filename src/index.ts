@@ -1,8 +1,9 @@
 // ════════════════════════════════════════════════════════════════════════
 // Worker — router da API. INVARIANTE: toda rota /api/* passa pelo gate
 // fail-closed ANTES de tocar em dado (spec §3). Sem token válido → 401.
-// CRUD das 5 entidades (RLS aplica via token do usuário), agenda de prazos
-// e os 5 agentes (output sempre com disclaimer; nada de jurisprudência).
+// CRUD das entidades do spec §6 (RLS aplica via token do usuário), agenda de
+// prazos, os 6 agentes (output sempre com disclaimer; nada de jurisprudência
+// gerada pelo modelo) e as extensões do spec §11 (DataJud, equipe, growth).
 // LGPD: nenhum dado de cliente/caso vai a log (spec §7.4) — não há console.log.
 // ════════════════════════════════════════════════════════════════════════
 
