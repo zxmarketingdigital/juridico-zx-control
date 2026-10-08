@@ -243,3 +243,22 @@ test("logo https com espaços nas pontas é tratado como URL, não como caminho"
   assert.equal(r.ok, true, JSON.stringify(r.erros));
   assert.equal(r.marca.logo, "https://exemplo.com/logo.png");
 });
+
+test("temporários: nomes aleatórios e abertura exclusiva — symlink pré-plantado com o nome antigo (.tmp-<pid>) não é seguido", () => {
+  const raiz = raizTemp();
+  const fora = mk2(join(tmpdir(), "marca-fora-"));
+  writeFileSync(join(fora, "alvo.txt"), "intocado");
+  mkdirSync(join(raiz, "painel", "marca"));
+  symlinkSync(join(fora, "alvo.txt"), join(raiz, "painel", `marca.config.js.tmp-${process.pid}`));
+  symlinkSync(join(fora, "alvo.txt"), join(raiz, "painel", "marca", `.logo.tmp-${process.pid}`));
+  const png = join(raiz, "l.png");
+  writeFileSync(png, PNG);
+  const r = gravarMarca({ nome: "X", cor_primaria: "#123456", logo: png }, { raiz });
+  assert.equal(r.ok, true);
+  assert.equal(readFileSync(join(fora, "alvo.txt"), "utf8"), "intocado");
+  assert.deepEqual(readdirSync(fora), ["alvo.txt"]);
+  const src = readFileSync(join(RAIZ_PADRAO, "setup", "marca.mjs"), "utf8");
+  assert.match(src, /randomBytes\(6\)/);
+  assert.match(src, /COPYFILE_EXCL/);
+  assert.match(src, /flag:\s*"wx"/);
+});

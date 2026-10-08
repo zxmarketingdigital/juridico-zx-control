@@ -15,10 +15,11 @@
 // script carrega esse mesmo arquivo (sem duplicar regra).
 // ════════════════════════════════════════════════════════════════════════
 
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync, statSync, rmSync, lstatSync, realpathSync, renameSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync, statSync, rmSync, lstatSync, realpathSync, renameSync, readdirSync, constants as fsConstants } from "node:fs";
 import { join, dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
+import { randomBytes } from "node:crypto";
 import vm from "node:vm";
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
@@ -110,9 +111,11 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
 
   // JSON em <script>: neutraliza "<" para não fechar a tag por engano.
   const json = JSON.stringify(config, null, 2).replace(/</g, "\\u003c");
-  const sufixo = `.tmp-${process.pid}`;
+  const sufixo = `.tmp-${randomBytes(6).toString("hex")}`; // nome imprevisível + abertura exclusiva (wx/COPYFILE_EXCL): não segue symlink pré-plantado
   const tmpConfig = arquivo + sufixo;
   const tmpLogo = copiar ? join(destinoDir, `.logo${sufixo}`) : null;
+  // Premissa: o setup é interativo e roda uma vez, pelo próprio aluno, no computador dele, conduzido
+  // pelo Claude Code — não há escritor concorrente, então não há lock (seria escopo a mais).
   try {
     // 2) Prepara tudo em arquivos temporários; o estado antigo continua intacto até aqui.
     if (copiar) {
@@ -121,13 +124,16 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
       // Destino SEMPRE dentro de painel/marca/ com nome fixo saneado (logo.<ext>): o nome/caminho
       // original do aluno (absoluto, com espaço, acentos) nunca chega ao front nem ao destino.
       if (!resolve(copiar.destino).startsWith(resolve(destinoDir) + "/")) throw new Error("destino da logo fora de painel/marca/");
-      copyFileSync(copiar.origem, tmpLogo);
+      copyFileSync(copiar.origem, tmpLogo, fsConstants.COPYFILE_EXCL);
+      garantirDestinoSeguro(raiz, [tmpLogo]);
       if (statSync(tmpLogo).size > LOGO_MAX_BYTES || statSync(tmpLogo).size !== statSync(copiar.origem).size) throw new Error("cópia da logo incompleta");
     }
     writeFileSync(
       tmpConfig,
       `// Gerado por \`node setup/marca.mjs\` — marca do escritório (gitignored). Rode de novo para trocar.\nwindow.ZX_MARCA = ${json};\n`,
+      { flag: "wx" }, // exclusivo: falha se o temporário já existir (inclusive como symlink)
     );
+    garantirDestinoSeguro(raiz, [tmpConfig]);
     // 3) Troca atômica: logo novo, depois config novo; só então some o que ficou órfão.
     if (copiar) renameSync(tmpLogo, copiar.destino);
     renameSync(tmpConfig, arquivo);
