@@ -80,6 +80,7 @@
       "--brand-bright-rgb": rgb(brilho).join(", "),
       "--brand-text": texto,
       "--on-brand": corSobre(primaria),
+      "--on-brand-hover": corSobre(claro),
       "--primary": primaria,
       "--primary-light": claro,
       "--primary-bright": brilho,

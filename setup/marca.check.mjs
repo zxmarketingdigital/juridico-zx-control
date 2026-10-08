@@ -147,3 +147,23 @@ test("front continua estrito: só https ou marca/<nome>; caminho absoluto/espaç
     assert.equal(Marca.validar({ nome: "X", logo: ruim }).ok, false, ruim);
   }
 });
+
+test("hover do botão: texto tem contraste >= 4.5 sobre o fundo clareado, para cores variadas", () => {
+  const lum = (h) => { const [r, g, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const cr = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  for (const cor of ["#555555", "#1E3A8A", "#D97706", "#FFFFFF", "#000000", "#7C3AED", "#0F766E", "#FACC15", "#808080"]) {
+    const v = Marca.derivar(cor, null);
+    assert.ok(v["--on-brand-hover"], cor);
+    assert.ok(cr(v["--on-brand-hover"].toUpperCase(), v["--primary-light"].toUpperCase()) >= 4.5, `hover ${cor}`);
+  }
+});
+
+test("hover: style.css e docs usam --on-brand-hover", () => {
+  const css = readFileSync(join(RAIZ_PADRAO, "painel", "style.css"), "utf8");
+  assert.match(css, /\.btn-primary:hover\s*\{[^}]*color:\s*var\(--on-brand-hover\)/);
+  for (const f of ["proposta.html", "apresentacao.html"]) {
+    const h = readFileSync(join(RAIZ_PADRAO, "docs", f), "utf8");
+    assert.match(h, /\.btn:hover\{[^}]*color:var\(--on-brand-hover\)/, f);
+    assert.match(h, /--on-brand-hover:#0D0D0D/, f);
+  }
+});

@@ -15,7 +15,7 @@
     --primary:#D97706; --primary-light:#F59E0B; --primary-bright:#FCD34D; --primary-dark:#92400e;
     /* Marca do aluno: painel/marca.js sobrescreve em runtime; abaixo, fallback (âmbar ZX). */
     --brand:#D97706; --brand-2:#92400e; --brand-rgb:217,119,6; --brand-light-rgb:245,158,11; --brand-bright-rgb:252,211,77;
-    --brand-text:#D97706; --on-brand:#0D0D0D;
+    --brand-text:#D97706; --on-brand:#0D0D0D; --on-brand-hover:#0D0D0D;
     --bg:#0D0D0D; --bg-alt:#0A0A0A; --surface:#1A1A1A; --surface2:#222; --footer:#080808;
     --text:#E2E8F0; --text-2:#9CA3AF; --text-muted:#6B7280; --border:#2A2A2A; --border-light:#333;
     --green:#4ADE80; --red:#EF4444;
@@ -101,7 +101,7 @@
     radial-gradient(700px 300px at 50% 0%, rgba(var(--brand-rgb),.16), transparent 70%), var(--bg-alt)}
   .cta-final h2{margin-bottom:14px}
   .btn{display:inline-block;font-weight:700;border-radius:10px;padding:14px 28px;background:var(--primary);color:var(--on-brand);border:1px solid var(--primary);transition:.15s}
-  .btn:hover{background:var(--primary-light);transform:translateY(-1px)}
+  .btn:hover{background:var(--primary-light);color:var(--on-brand-hover);transform:translateY(-1px)}
   .btn.ghost{background:transparent;color:var(--primary-light)}
   .btn.ghost:hover{background:var(--surface);transform:none}
   .btn.big{padding:16px 38px;font-size:1.05rem}

@@ -18,6 +18,7 @@
   --brand-bright-rgb: 252, 211, 77;
   --brand-text: #D97706;
   --on-brand: #0D0D0D;
+  --on-brand-hover: #0D0D0D;
   --bg: #0D0D0D;
   --bg-alt: #0A0A0A;
   --surface: #1A1A1A;
@@ -174,7 +175,7 @@ tbody tr.vencendo { background: rgba(var(--brand-rgb), .08); }
 }
 .btn:hover { border-color: var(--muted); }
 .btn-primary { background: var(--primary); border-color: var(--primary); color: var(--on-brand); font-weight: 700; }
-.btn-primary:hover { background: var(--primary-light); border-color: var(--primary-light); }
+.btn-primary:hover { background: var(--primary-light); border-color: var(--primary-light); color: var(--on-brand-hover); }
 .btn-danger { background: transparent; border-color: rgba(239, 68, 68, .45); color: var(--red); }
 .btn-danger:hover { background: rgba(239, 68, 68, .10); }
 .btn-sm { padding: 5px 10px; font-size: 12px; }
