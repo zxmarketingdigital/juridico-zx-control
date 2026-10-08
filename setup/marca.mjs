@@ -15,7 +15,7 @@
 // script carrega esse mesmo arquivo (sem duplicar regra).
 // ════════════════════════════════════════════════════════════════════════
 
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync, statSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync, statSync, rmSync, lstatSync, realpathSync, renameSync, readdirSync } from "node:fs";
 import { join, dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
@@ -33,6 +33,26 @@ export function carregarNucleo(raiz = RAIZ_PADRAO) {
   sandbox.globalThis = sandbox;
   vm.runInNewContext(src, sandbox, { filename: "painel/marca.js" });
   return sandbox.ZXMarca;
+}
+
+/** Rejeita symlink em qualquer componente (de `raiz` até cada alvo) e exige realpath dentro da raiz real. */
+function garantirDestinoSeguro(raiz, alvos) {
+  const raizReal = realpathSync(raiz);
+  for (const alvo of alvos) {
+    const rel = resolve(alvo).slice(resolve(raiz).length);
+    if (!resolve(alvo).startsWith(resolve(raiz) + "/")) throw new Error(`destino fora da raiz: ${alvo}`);
+    let atual = resolve(raiz);
+    for (const parte of rel.split("/").filter(Boolean)) {
+      atual = join(atual, parte);
+      let st;
+      try { st = lstatSync(atual); } catch { break; } // ainda não existe: será criado dentro do pai já verificado
+      if (st.isSymbolicLink()) throw new Error(`destino é link simbólico (recusado): ${atual}`);
+    }
+    if (existsSync(alvo)) {
+      const real = realpathSync(alvo);
+      if (real !== raizReal && !real.startsWith(raizReal + "/")) throw new Error(`destino escapa da raiz: ${alvo}`);
+    }
+  }
 }
 
 const expandirHome = (p) => (p.startsWith("~/") ? join(homedir(), p.slice(2)) : p);
@@ -80,25 +100,48 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
     logo: marca.logo,
   };
 
+  const arquivo = join(painel, "marca.config.js");
+  // 1) Nada é removido nem gravado antes de provar que o destino está DENTRO da raiz real:
+  //    painel/, painel/marca/, o logo e o config não podem ser symlink (nem a raiz real escapar).
+  garantirDestinoSeguro(raiz, [painel, destinoDir, arquivo, ...(copiar ? [copiar.destino] : [])]);
   mkdirSync(painel, { recursive: true });
-  if (copiar) {
-    // Destino SEMPRE dentro de painel/marca/ com nome fixo saneado (logo.<ext>): o nome/caminho
-    // original do aluno (absoluto, com espaço, acentos) nunca chega ao front nem ao destino.
-    rmSync(destinoDir, { recursive: true, force: true }); // sem logo antigo órfão de outra extensão
-    mkdirSync(destinoDir, { recursive: true });
-    if (!resolve(copiar.destino).startsWith(resolve(destinoDir) + "/")) throw new Error("destino da logo fora de painel/marca/");
-    copyFileSync(copiar.origem, copiar.destino);
-  } else if (existsSync(destinoDir) && !config.logo) {
-    rmSync(destinoDir, { recursive: true, force: true }); // trocou para "sem logo": não deixa logo antigo órfão
-  }
+  garantirDestinoSeguro(raiz, [painel]);
 
   // JSON em <script>: neutraliza "<" para não fechar a tag por engano.
   const json = JSON.stringify(config, null, 2).replace(/</g, "\\u003c");
-  const arquivo = join(painel, "marca.config.js");
-  writeFileSync(
-    arquivo,
-    `// Gerado por \`node setup/marca.mjs\` — marca do escritório (gitignored). Rode de novo para trocar.\nwindow.ZX_MARCA = ${json};\n`,
-  );
+  const sufixo = `.tmp-${process.pid}`;
+  const tmpConfig = arquivo + sufixo;
+  const tmpLogo = copiar ? join(destinoDir, `.logo${sufixo}`) : null;
+  try {
+    // 2) Prepara tudo em arquivos temporários; o estado antigo continua intacto até aqui.
+    if (copiar) {
+      mkdirSync(destinoDir, { recursive: true });
+      garantirDestinoSeguro(raiz, [destinoDir]);
+      // Destino SEMPRE dentro de painel/marca/ com nome fixo saneado (logo.<ext>): o nome/caminho
+      // original do aluno (absoluto, com espaço, acentos) nunca chega ao front nem ao destino.
+      if (!resolve(copiar.destino).startsWith(resolve(destinoDir) + "/")) throw new Error("destino da logo fora de painel/marca/");
+      copyFileSync(copiar.origem, tmpLogo);
+      if (statSync(tmpLogo).size !== statSync(copiar.origem).size) throw new Error("cópia da logo incompleta");
+    }
+    writeFileSync(
+      tmpConfig,
+      `// Gerado por \`node setup/marca.mjs\` — marca do escritório (gitignored). Rode de novo para trocar.\nwindow.ZX_MARCA = ${json};\n`,
+    );
+    // 3) Troca atômica: logo novo, depois config novo; só então some o que ficou órfão.
+    if (copiar) renameSync(tmpLogo, copiar.destino);
+    renameSync(tmpConfig, arquivo);
+    if (copiar) {
+      const novoNome = copiar.destino.split("/").pop();
+      for (const f of readdirSync(destinoDir)) {
+        if (f !== novoNome) rmSync(join(destinoDir, f), { recursive: true, force: true });
+      }
+    } else if (existsSync(destinoDir)) {
+      rmSync(destinoDir, { recursive: true, force: true }); // sem logo local: não deixa logo antigo órfão
+    }
+  } finally {
+    rmSync(tmpConfig, { force: true });
+    if (tmpLogo) rmSync(tmpLogo, { force: true });
+  }
   return { ok: true, erros: [], avisos, marca: config, arquivo };
 }
 

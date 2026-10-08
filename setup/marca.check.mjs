@@ -167,3 +167,72 @@ test("hover: style.css e docs usam --on-brand-hover", () => {
     assert.match(h, /--on-brand-hover:#0D0D0D/, f);
   }
 });
+
+import { symlinkSync, mkdtempSync as mk2, readdirSync, chmodSync } from "node:fs";
+
+test("symlink: painel/, painel/marca/ e marca.config.js como link são recusados e NADA é apagado ou gravado fora da raiz", () => {
+  for (const alvo of ["painel", "marca-dir", "config"]) {
+    const raiz = mk2(join(tmpdir(), "marca-sl-"));
+    const fora = mk2(join(tmpdir(), "marca-fora-"));
+    writeFileSync(join(fora, "intocado.txt"), "x");
+    const png = join(raiz, "l.png");
+    writeFileSync(png, PNG);
+    if (alvo === "painel") {
+      copyFileSync(join(RAIZ_PADRAO, "painel", "marca.js"), join(fora, "marca.js")); // núcleo carrega; só o guard de symlink pode recusar
+      symlinkSync(fora, join(raiz, "painel"));
+    } else {
+      mkdirSync(join(raiz, "painel"));
+      copyFileSync(join(RAIZ_PADRAO, "painel", "marca.js"), join(raiz, "painel", "marca.js"));
+      if (alvo === "marca-dir") symlinkSync(fora, join(raiz, "painel", "marca"));
+      else symlinkSync(join(fora, "cfg.js"), join(raiz, "painel", "marca.config.js"));
+    }
+    let falhou = false;
+    try { gravarMarca({ nome: "X", cor_primaria: "#123456", logo: png }, { raiz }); } catch { falhou = true; }
+    assert.ok(falhou, alvo);
+    assert.ok(!existsSync(join(fora, "marca")) && !existsSync(join(fora, "marca.config.js")), alvo);
+    assert.deepEqual(readdirSync(fora).sort(), alvo === "painel" ? ["intocado.txt", "marca.js"] : ["intocado.txt"], `${alvo}: nada pode ser escrito fora da raiz`);
+  }
+});
+
+test("atômico: falha na cópia do logo preserva logo e config antigos", () => {
+  const raiz = raizTemp();
+  const png = join(raiz, "a.png");
+  writeFileSync(png, PNG);
+  assert.equal(gravarMarca({ nome: "Antigo", cor_primaria: "#123456", logo: png }, { raiz }).ok, true);
+  const cfgAntes = readFileSync(join(raiz, "painel", "marca.config.js"), "utf8");
+  const png2 = join(raiz, "b.png");
+  writeFileSync(png2, PNG);
+  chmodSync(png2, 0o000); // existe e tem tamanho, mas a cópia falha ao ler
+  let falhou = false;
+  try { gravarMarca({ nome: "Novo", cor_primaria: "#654321", logo: png2 }, { raiz }); } catch { falhou = true; }
+  chmodSync(png2, 0o644);
+  if (process.getuid && process.getuid() === 0) return; // root ignora chmod
+  assert.ok(falhou);
+  assert.equal(readFileSync(join(raiz, "painel", "marca.config.js"), "utf8"), cfgAntes);
+  assert.ok(existsSync(join(raiz, "painel", "marca", "logo.png")));
+  assert.deepEqual(readdirSync(join(raiz, "painel", "marca")), ["logo.png"]);
+  assert.deepEqual(readdirSync(join(raiz, "painel")).filter((f) => f.includes(".tmp-")), []);
+});
+
+test("front: logo local só aceita exatamente marca/logo.<ext>", () => {
+  for (const ok of ["marca/logo.png", "marca/logo.JPG", "marca/logo.webp", "marca/logo.svg", "marca/logo.jpeg"]) {
+    assert.equal(Marca.validar({ nome: "X", cor_primaria: "#123456", logo: ok }).marca.logo, ok, ok);
+  }
+  for (const ruim of ["img/qualquer.png", "marca/outro.png", "logo.png", "marca/sub/logo.png", "../marca/logo.png", "/etc/logo.png"]) {
+    assert.notEqual(Marca.validar({ nome: "X", cor_primaria: "#123456", logo: ruim }).marca.logo, ruim, ruim);
+  }
+});
+
+test("corSobre: >= 4.5:1 para TODA cor (varredura), inclusive #777777 que falha com #0D0D0D e branco", () => {
+  const lum = (h) => { const [r, g, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const cr = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  assert.ok(cr(Marca.corSobre("#777777"), "#777777") >= 4.5);
+  for (let v = 0; v < 256; v += 1) {
+    const h = "#" + [v, v, v].map((n) => n.toString(16).padStart(2, "0")).join("").toUpperCase();
+    assert.ok(cr(Marca.corSobre(h), h) >= 4.5, h);
+  }
+  for (let r = 0; r < 256; r += 51) for (let g = 0; g < 256; g += 51) for (let b = 0; b < 256; b += 51) {
+    const h = "#" + [r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("").toUpperCase();
+    assert.ok(cr(Marca.corSobre(h), h) >= 4.5, h);
+  }
+});

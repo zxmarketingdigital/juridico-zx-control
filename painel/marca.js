@@ -17,7 +17,7 @@
   var COR_PADRAO = "#D97706";           // âmbar ZX (fallback com aviso no setup)
   var ESCURO = "#0D0D0D";               // texto sobre a cor da marca / fundo base
   var BRANCO = "#FFFFFF";
-  var LOGO_LOCAL = /^[A-Za-z0-9_][A-Za-z0-9_./-]*\.(png|jpe?g|svg|webp)$/i;
+  var LOGO_LOCAL = /^marca\/logo\.(png|jpe?g|svg|webp)$/i;
   var LOGO_URL = /^https:\/\/[^\s"'<>()]+$/i;
   var NOME_MAX = 60;
 
@@ -56,8 +56,11 @@
     return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
   }
   // Cor de texto sobre botão/selo da marca: a de maior contraste (escuro ou branco).
+  // Garante >= 4.5:1: se #0D0D0D e branco não bastam (ex.: #777777), usa preto puro.
   function corSobre(fundo) {
-    return contraste(fundo, ESCURO) >= contraste(fundo, BRANCO) ? ESCURO : BRANCO;
+    var c = contraste(fundo, ESCURO) >= contraste(fundo, BRANCO) ? ESCURO : BRANCO;
+    if (contraste(fundo, c) >= 4.5) return c;
+    return contraste(fundo, "#000000") >= contraste(fundo, BRANCO) ? "#000000" : BRANCO;
   }
   // Cor da marca usada COMO TEXTO sobre o fundo escuro: clareia até contraste >= 4.5.
   function corTexto(h) {
