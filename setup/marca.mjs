@@ -8,7 +8,7 @@
 //   node setup/marca.mjs --nome "Silva & Associados" --cor "#1E3A8A" \
 //        [--secundaria "#0F172A"] [--logo ~/Downloads/logo.png | https://...]
 //
-// Saída: painel/marca.config.js (gitignored) + painel/marca/logo.<ext> (gitignored).
+// Saída: painel/marca.config.js (gitignored) + painel/marca/logo-<id>.<ext> (gitignored).
 // Exit 0 = gravado · 1 = campo inválido (nada gravado; pergunte de novo) · 2 = erro de arquivo.
 //
 // UM VALOR, UM LUGAR: validação/derivação de cor vivem em painel/marca.js; este
@@ -123,7 +123,7 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
     if (copiar) {
       mkdirSync(destinoDir, { recursive: true });
       garantirDestinoSeguro(raiz, [destinoDir]);
-      // Destino SEMPRE dentro de painel/marca/ com nome fixo saneado (logo.<ext>): o nome/caminho
+      // Destino SEMPRE dentro de painel/marca/ com nome saneado e versionado (logo-<id>.<ext>): o nome/caminho
       // original do aluno (absoluto, com espaço, acentos) nunca chega ao front nem ao destino.
       if (!resolve(copiar.destino).startsWith(resolve(destinoDir) + "/")) throw new Error("destino da logo fora de painel/marca/");
       copyFileSync(copiar.origem, tmpLogo, fsConstants.COPYFILE_EXCL);
