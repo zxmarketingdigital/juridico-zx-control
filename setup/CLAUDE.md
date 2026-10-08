@@ -24,6 +24,34 @@ Se faltar alguma, oriente a criar (todas têm plano gratuito) antes de seguir.
 
 ## Passo a passo (você executa, conduzindo)
 
+### 0. Marca do escritório — nome, cor e logo (pergunte ANTES de instalar qualquer coisa)
+
+O painel, a proposta e a apresentação saem com a **marca do aluno**, não com a da ZX. Pergunte, **um
+campo por vez**, e só depois grave:
+
+1. **Nome do escritório** (obrigatório) — ex.: "Silva & Associados". É o nome que aparece no topo do
+   painel, no login e na proposta.
+2. **Cor principal** (obrigatória) — peça no formato `#RRGGBB` (ex.: `#1E3A8A`); aceite `#RGB` também.
+   Se o aluno não souber, ofereça ajudar a escolher pela cor do site ou do logo dele. Se mesmo assim
+   não quiser escolher, siga **sem** `--cor`: o painel usa a cor padrão ZX (âmbar) e o script avisa
+   isso no terminal. Diga ao aluno que dá para trocar depois rodando o comando de novo.
+3. **Cor secundária** (opcional) — mesmo formato. Em branco = o painel usa uma versão mais escura da principal.
+4. **Logo** (opcional) — caminho de uma imagem **no computador do aluno** (png, jpg, svg ou webp, até
+   2 MB) **ou** uma URL `https`. Sem logo, o painel mostra só o nome. **Nunca** coloque a logo da ZX no lugar.
+
+Depois de ter as respostas, rode (omita as flags que o aluno não preencheu):
+
+```
+node setup/marca.mjs --nome "<nome>" --cor "<#RRGGBB>" [--secundaria "<#RRGGBB>"] [--logo "<caminho ou URL https>"]
+```
+
+- **Exit 0** = gravado em `painel/marca.config.js` (arquivo do aluno, gitignored — não vai pro GitHub).
+- **Exit 1** = algum campo inválido (o script lista qual). **Não grave na mão**: explique o erro em uma
+  frase, pergunte aquele campo de novo e rode outra vez.
+- Para conferir antes de publicar, rode a demo (`node demo/server.mjs`) e abra o painel: cor, nome e
+  logo já devem estar aplicados. O botão fica com texto escuro ou claro automaticamente, conforme a cor.
+- Trocar a marca depois = rodar o mesmo comando de novo com os novos valores (e publicar o painel outra vez).
+
 ### 1. Supabase — banco + Auth + Storage
 - Peça ao aluno para criar um **projeto** no Supabase. Conduza: "Me manda a **URL do projeto**
   (Settings → API → Project URL)." Guarde em `SUPABASE_URL`.
@@ -45,6 +73,7 @@ Se faltar alguma, oriente a criar (todas têm plano gratuito) antes de seguir.
 ### 4. Painel (Pages) — Cloudflare
 - Crie `painel/config.js` a partir de `painel/config.example.js` com `SUPABASE_URL` e
   `SUPABASE_ANON_KEY` do aluno (esse arquivo é gitignored).
+- Confirme que `painel/marca.config.js` existe (passo 0) — ele é publicado junto com o painel.
 - Publique a pasta `painel/` no Cloudflare Pages.
 
 ### 5. Primeiro advogado
@@ -58,8 +87,8 @@ Se faltar alguma, oriente a criar (todas têm plano gratuito) antes de seguir.
 
 ## Para demonstrar sem instalar nada
 
-Se o aluno só quer **mostrar para um cliente**, rode a demo local — sobe o painel populado, sem
-nenhuma credencial:
+Se o aluno só quer **mostrar para um cliente**, faça o **passo 0 (Marca)** e rode a demo local — sobe o
+painel populado, já com o nome, a cor e a logo dele, sem nenhuma credencial:
 
 ```
 node demo/server.mjs   →   http://localhost:8910

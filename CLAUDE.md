@@ -17,6 +17,8 @@
 >
 > - Prefira resolver por **configuração** (`.env`, `painel/config.js`, banco/seed): sobrevive intacto à
 >   atualização por tag.
+> - **Marca do escritório (nome, cor, logo):** é configuração, não código — `node setup/marca.mjs --nome ... --cor
+>   ...` grava `painel/marca.config.js`. Nunca edite `#D97706` em `style.css` para trocar a cor.
 > - Se precisar mesmo editar `src/`: trabalhe numa **branch** (`git checkout -b custom-<cliente>`), rode
 >   **`pnpm test`** depois (verde = não quebrou os agentes) e avise que a alteração precisará ser
 >   reaplicada quando sair uma versão nova (`git fetch --tags && git checkout vX.Y.Z`).

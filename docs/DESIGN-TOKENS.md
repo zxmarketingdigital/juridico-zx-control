@@ -24,6 +24,11 @@
 }
 ```
 
+> **Marca do aluno:** as vars de cor acima são o *fallback* (âmbar ZX). Em runtime `painel/marca.js` as
+> sobrescreve a partir de `painel/marca.config.js` (gerado por `node setup/marca.mjs`): `--brand`/`--primary`
+> (cor principal), `--brand-2`/`--primary-dark` (secundária), `--brand-text` (cor principal legível como texto
+> no fundo escuro) e `--on-brand` (texto sobre botão, escolhido por contraste). Use sempre as vars, nunca o hex.
+
 ## Tipografia
 
 | Uso | Fonte | Como |

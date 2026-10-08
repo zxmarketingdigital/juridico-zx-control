@@ -5,3 +5,5 @@ dist/
 .dev.vars
 *.local
 painel/config.js
+painel/marca.config.js
+painel/marca/

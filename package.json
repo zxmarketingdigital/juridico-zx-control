@@ -6,9 +6,10 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:marca": "node --test setup/marca.check.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
     "dev": "wrangler dev",
-    "ci": "pnpm typecheck && pnpm vitest run && wrangler deploy --dry-run",
+    "ci": "pnpm typecheck && pnpm vitest run && pnpm test:marca && wrangler deploy --dry-run",
     "deploy": "wrangler deploy"
   },
   "license": "ISC",

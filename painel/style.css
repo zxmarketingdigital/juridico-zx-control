@@ -9,6 +9,15 @@
   --primary-light: #F59E0B;
   --primary-bright: #FCD34D;
   --primary-dark: #92400e;
+  /* Marca do aluno: painel/marca.js sobrescreve estas vars em runtime (SPEC marca-aluno).
+     Os valores abaixo são o fallback (âmbar ZX) quando não há painel/marca.config.js. */
+  --brand: #D97706;
+  --brand-2: #92400e;
+  --brand-rgb: 217, 119, 6;
+  --brand-light-rgb: 245, 158, 11;
+  --brand-bright-rgb: 252, 211, 77;
+  --brand-text: #D97706;
+  --on-brand: #0D0D0D;
   --bg: #0D0D0D;
   --bg-alt: #0A0A0A;
   --surface: #1A1A1A;
@@ -53,9 +62,15 @@ header.topbar {
   font-family: var(--mono); font-size: 15px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .08em; margin: 0; color: var(--text);
 }
-.topbar h1 .cursor { color: var(--primary); animation: blink 1.1s steps(1) infinite; }
+.topbar h1 .cursor { color: var(--brand-text); animation: blink 1.1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 .topbar .spacer { flex: 1; }
+/* Logo do aluno (marca.js preenche e revela; sem logo, fica oculto e só o nome aparece) */
+.marca-logo { display: inline-flex; align-items: center; }
+.marca-logo[hidden] { display: none; }
+.marca-logo img { display: block; height: 28px; max-width: 160px; object-fit: contain; }
+.login-card .marca-logo { margin-bottom: 14px; }
+.login-card .marca-logo img { height: 44px; max-width: 220px; }
 .statusdot {
   width: 9px; height: 9px; border-radius: 50%; background: var(--green);
   box-shadow: 0 0 8px var(--green); display: inline-block;
@@ -70,7 +85,7 @@ header.topbar {
 nav.side { border-right: 1px solid var(--border); padding: 18px 12px; }
 nav.side .eyebrow {
   font-family: var(--mono); font-size: .72rem; text-transform: uppercase;
-  letter-spacing: .16em; color: var(--primary); padding: 0 10px; margin: 14px 0 6px;
+  letter-spacing: .16em; color: var(--brand-text); padding: 0 10px; margin: 14px 0 6px;
 }
 .navpill {
   display: flex; align-items: center; gap: 10px; width: 100%;
@@ -81,7 +96,7 @@ nav.side .eyebrow {
 }
 .navpill:hover { background: rgba(255, 255, 255, .03); color: var(--text); }
 .navpill.active {
-  background: rgba(217, 119, 6, .14); border-color: rgba(217, 119, 6, .35);
+  background: rgba(var(--brand-rgb), .14); border-color: rgba(var(--brand-rgb), .35);
   color: var(--primary-bright);
 }
 main.content { padding: 26px 30px; overflow: auto; }
@@ -98,7 +113,7 @@ main.content { padding: 26px 30px; overflow: auto; }
 }
 .card:hover { border-color: var(--primary-dark); transform: translateY(-2px); }
 .card .ag-num {
-  font-family: var(--mono); font-size: 11px; color: var(--primary);
+  font-family: var(--mono); font-size: 11px; color: var(--brand-text);
   letter-spacing: .12em;
 }
 .card h3 { font-size: 15px; margin: 8px 0 6px; }
@@ -114,10 +129,10 @@ thead th {
 }
 tbody td { font-size: 13px; color: var(--text-secondary); padding: 11px 14px; border-bottom: 1px solid var(--border); }
 tbody tr:nth-child(odd) { background: rgba(255, 255, 255, .012); }
-tbody tr:hover { background: rgba(217, 119, 6, .045); }
+tbody tr:hover { background: rgba(var(--brand-rgb), .045); }
 tbody td:first-child { color: var(--text); font-weight: 500; }
 tbody tr.vencido { background: rgba(239, 68, 68, .08); }
-tbody tr.vencendo { background: rgba(217, 119, 6, .08); }
+tbody tr.vencendo { background: rgba(var(--brand-rgb), .08); }
 .row-actions { display: flex; gap: 8px; }
 
 /* ── Badges (6 grupos do DESIGN-TOKENS) ──────────────────────────────── */
@@ -136,11 +151,11 @@ tbody tr.vencendo { background: rgba(217, 119, 6, .08); }
 }
 /* âmbar: ativo-em-andamento/agendada/vencendo/medio/etapa-meio */
 .badge.suspenso, .badge.agendada, .badge.vencendo, .badge.qualificado, .badge.medio, .badge.respondeu_formulario, .badge.fixo_mensal {
-  background: rgba(245, 158, 11, .12); color: var(--primary-light); border-color: rgba(245, 158, 11, .30);
+  background: rgba(var(--brand-light-rgb), .12); color: var(--primary-light); border-color: rgba(var(--brand-light-rgb), .30);
 }
 /* âmbar-bright: negociacao/pendente/reuniao */
 .badge.negociacao, .badge.pendente, .badge.reuniao_agendada {
-  background: rgba(252, 211, 77, .12); color: var(--primary-bright); border-color: rgba(252, 211, 77, .30);
+  background: rgba(var(--brand-bright-rgb), .12); color: var(--primary-bright); border-color: rgba(var(--brand-bright-rgb), .30);
 }
 /* vermelho: perdido/vencido/falhou/fraco/desqualificado */
 .badge.perdido, .badge.vencido, .badge.falhou, .badge.fraco, .badge.desqualificado {
@@ -158,7 +173,7 @@ tbody tr.vencendo { background: rgba(217, 119, 6, .08); }
   cursor: pointer; font-family: var(--sans);
 }
 .btn:hover { border-color: var(--muted); }
-.btn-primary { background: var(--primary); border-color: var(--primary); color: #0D0D0D; font-weight: 700; }
+.btn-primary { background: var(--primary); border-color: var(--primary); color: var(--on-brand); font-weight: 700; }
 .btn-primary:hover { background: var(--primary-light); border-color: var(--primary-light); }
 .btn-danger { background: transparent; border-color: rgba(239, 68, 68, .45); color: var(--red); }
 .btn-danger:hover { background: rgba(239, 68, 68, .10); }
@@ -178,7 +193,7 @@ input, select, textarea {
 input[type="date"], input[type="tel"], input[inputmode="numeric"] { font-family: var(--mono); }
 textarea { min-height: 110px; resize: vertical; }
 input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(217, 119, 6, .18);
+  outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--brand-rgb), .18);
 }
 
 /* ── Modal ───────────────────────────────────────────────────────────── */
@@ -207,18 +222,18 @@ input:focus, select:focus, textarea:focus {
 /* ── Toast ───────────────────────────────────────────────────────────── */
 .toast {
   position: fixed; bottom: 22px; right: 22px; z-index: 60;
-  background: var(--surface2); border: 1px solid rgba(217, 119, 6, .5);
+  background: var(--surface2); border: 1px solid rgba(var(--brand-rgb), .5);
   color: var(--text); padding: 12px 16px; border-radius: var(--radius);
   font-size: 13px; box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
 }
 
 /* ── Login ───────────────────────────────────────────────────────────── */
 .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(1200px 600px at 50% -10%, rgba(217, 119, 6, .13), transparent), var(--bg-alt); }
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(var(--brand-rgb), .13), transparent), var(--bg-alt); }
 .login-card { width: 380px; background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-card); padding: 30px; }
 .login-card .eyebrow { font-family: var(--mono); font-size: .74rem; text-transform: uppercase;
-  letter-spacing: .16em; color: var(--primary); }
+  letter-spacing: .16em; color: var(--brand-text); }
 .login-card h1 { font-size: 22px; margin: 6px 0 22px; letter-spacing: -.01em; }
 .login-err { color: var(--red); font-size: 12.5px; margin-top: 10px; min-height: 16px; }
 .empty { color: var(--muted); font-size: 13px; padding: 28px; text-align: center; }

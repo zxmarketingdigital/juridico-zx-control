@@ -40,7 +40,7 @@ const defaults = {
   leads: { status: "recebeu_formulario" },
 };
 
-const MIME = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "application/javascript; charset=utf-8", ".json": "application/json; charset=utf-8", ".svg": "image/svg+xml", ".ico": "image/x-icon" };
+const MIME = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "application/javascript; charset=utf-8", ".json": "application/json; charset=utf-8", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon" };
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS" };
 
 function json(res, data, status = 200) {
@@ -92,6 +92,11 @@ async function serveStatic(req, res) {
     res.writeHead(200, { "Content-Type": MIME[extname(p)] ?? "application/octet-stream" });
     res.end(buf);
   } catch {
+    // Marca do aluno é opcional: sem painel/marca.config.js a demo roda com o padrão (sem 404 no console).
+    if (p === "/marca.config.js") {
+      res.writeHead(200, { "Content-Type": MIME[".js"] });
+      return res.end("/* sem marca configurada — rode: node setup/marca.mjs */");
+    }
     res.writeHead(404);
     res.end("Not found");
   }

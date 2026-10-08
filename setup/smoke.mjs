@@ -21,6 +21,12 @@ for (const k of OPCIONAIS) {
   console.log(`   ${ok ? "✅" : "•"} ${k}  (opcional)`);
 }
 
+// Marca do escritório (não bloqueia): sem painel/marca.config.js o painel sai com o padrão ZX.
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+const marcaOk = existsSync(fileURLToPath(new URL("../painel/marca.config.js", import.meta.url)));
+console.log(`   ${marcaOk ? "✅" : "•"} marca do escritório (painel/marca.config.js)${marcaOk ? "" : "  — não configurada: rode node setup/marca.mjs"}`);
+
 if (faltando > 0) {
   console.log(`\n  ${faltando} variável(is) faltando. Configure os segredos do Worker e rode de novo.\n`);
   process.exit(1);

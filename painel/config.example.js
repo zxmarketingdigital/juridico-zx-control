@@ -7,3 +7,6 @@ window.ZX = {
   // DEMO: true,            // ativado automaticamente pela demo local
   // DEMO_TOKEN: "demo-juridico-2026",
 };
+
+// A MARCA do escritório (nome, cor, logo) NÃO fica aqui: `node setup/marca.mjs` grava
+// painel/marca.config.js (gitignored). Para trocar depois, rode o comando de novo.

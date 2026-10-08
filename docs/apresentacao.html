@@ -9,6 +9,9 @@
 <style>
   :root{
     --primary:#D97706; --primary-light:#F59E0B; --primary-bright:#FCD34D; --primary-dark:#92400e;
+    /* Marca do aluno: painel/marca.js sobrescreve em runtime; abaixo, fallback (âmbar ZX). */
+    --brand:#D97706; --brand-2:#92400e; --brand-rgb:217,119,6; --brand-light-rgb:245,158,11; --brand-bright-rgb:252,211,77;
+    --brand-text:#D97706; --on-brand:#0D0D0D;
     --bg:#0D0D0D; --bg-alt:#0A0A0A; --surface:#1A1A1A; --surface2:#222; --footer:#080808;
     --text:#E2E8F0; --text-2:#9CA3AF; --text-muted:#6B7280; --border:#2A2A2A; --border-light:#333;
     --green:#4ADE80; --red:#EF4444; --indigo:#818CF8;
@@ -20,7 +23,7 @@
   .wrap{max-width:1020px;margin:0 auto;padding:0 24px}
   .accent{color:var(--primary-light)}
   header{padding:84px 0 64px;border-bottom:1px solid var(--border);background:
-    radial-gradient(900px 400px at 50% -10%, rgba(217,119,6,.13), transparent 70%), var(--bg-alt)}
+    radial-gradient(900px 400px at 50% -10%, rgba(var(--brand-rgb),.13), transparent 70%), var(--bg-alt)}
   .kicker{font-family:'JetBrains Mono',monospace;font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;
     color:var(--primary-light);display:inline-flex;align-items:center;gap:10px;
     border:1px solid var(--border-light);background:var(--surface);padding:8px 16px;border-radius:99px;margin-bottom:28px}
@@ -34,33 +37,35 @@
   .chip{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text-2);background:var(--surface);
     border:1px solid var(--border);border-radius:8px;padding:8px 13px}
   section{padding:60px 0;border-bottom:1px solid var(--border)}
-  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);margin-bottom:14px}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--brand-text);margin-bottom:14px}
   h2{font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;letter-spacing:-.01em;margin-bottom:14px}
   p.sub{color:var(--text-2);max-width:720px;margin-bottom:30px}
   .grid{display:grid;gap:16px}
   .g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
   .g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px}
-  .card .n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--primary);letter-spacing:.12em}
+  .card .n{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--brand-text);letter-spacing:.12em}
   .card h3{font-size:1.1rem;margin:8px 0 8px}
   .card p{color:var(--text-2);font-size:.95rem}
   ol.steps{list-style:none;counter-reset:s;display:grid;gap:14px}
   ol.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 18px 18px 60px;position:relative}
   ol.steps li::before{content:counter(s);position:absolute;left:16px;top:16px;width:30px;height:30px;border-radius:8px;
-    background:rgba(217,119,6,.14);border:1px solid rgba(217,119,6,.35);color:var(--primary-bright);
+    background:rgba(var(--brand-rgb),.14);border:1px solid rgba(var(--brand-rgb),.35);color:var(--primary-bright);
     font-family:'JetBrains Mono',monospace;font-weight:700;display:flex;align-items:center;justify-content:center}
   ol.steps li b{color:var(--text)}
   .prompt-box{background:var(--bg-alt);border:1px solid var(--border-light);border-radius:12px;padding:18px;margin-top:14px}
   .prompt-box code{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--primary-bright);display:block;white-space:pre-wrap}
-  .btn{font-family:'Inter',sans-serif;cursor:pointer;border-radius:10px;padding:11px 20px;font-weight:700;font-size:.95rem;border:1px solid var(--primary);background:var(--primary);color:#0D0D0D}
+  .btn{font-family:'Inter',sans-serif;cursor:pointer;border-radius:10px;padding:11px 20px;font-weight:700;font-size:.95rem;border:1px solid var(--primary);background:var(--primary);color:var(--on-brand)}
   .btn:hover{background:var(--primary-light)}
   .btn.ghost{background:transparent;color:var(--text);border-color:var(--border-light);font-weight:600}
   .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;align-items:center}
   footer{padding:40px 0;background:var(--footer);color:var(--text-muted);font-size:.85rem}
-  .toast{position:fixed;bottom:22px;right:22px;background:var(--surface2);border:1px solid rgba(217,119,6,.5);
+  .toast{position:fixed;bottom:22px;right:22px;background:var(--surface2);border:1px solid rgba(var(--brand-rgb),.5);
     color:var(--text);padding:12px 16px;border-radius:10px;opacity:0;transition:opacity .2s}
   .toast.show{opacity:1}
 </style>
+<script src="../painel/marca.config.js"></script>
+<script src="../painel/marca.js"></script>
 </head>
 <body>
 <header>
