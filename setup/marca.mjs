@@ -82,7 +82,11 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
 
   mkdirSync(painel, { recursive: true });
   if (copiar) {
+    // Destino SEMPRE dentro de painel/marca/ com nome fixo saneado (logo.<ext>): o nome/caminho
+    // original do aluno (absoluto, com espaço, acentos) nunca chega ao front nem ao destino.
+    rmSync(destinoDir, { recursive: true, force: true }); // sem logo antigo órfão de outra extensão
     mkdirSync(destinoDir, { recursive: true });
+    if (!resolve(copiar.destino).startsWith(resolve(destinoDir) + "/")) throw new Error("destino da logo fora de painel/marca/");
     copyFileSync(copiar.origem, copiar.destino);
   } else if (existsSync(destinoDir) && !config.logo) {
     rmSync(destinoDir, { recursive: true, force: true }); // trocou para "sem logo": não deixa logo antigo órfão

@@ -124,3 +124,26 @@ test("style.css: nenhum âmbar fixo fora do fallback das custom properties; bot�
   assert.doesNotMatch(corpo, /252,\s*211,\s*77/);
   assert.match(css, /\.btn-primary\s*\{[^}]*color:\s*var\(--on-brand\)/);
 });
+
+test("logo local: caminho absoluto com espaço/acento é aceito, copiado como marca/logo.<ext>; troca de extensão não deixa órfão", () => {
+  const raiz = raizTemp();
+  const dir = join(raiz, "Meus Downloads");
+  mkdirSync(dir);
+  const png = join(dir, "Logo Silva é.PNG");
+  writeFileSync(png, PNG);
+  let r = gravarMarca({ nome: "X", cor_primaria: "#123456", logo: png }, { raiz });
+  assert.equal(r.ok, true, JSON.stringify(r.erros));
+  assert.equal(r.marca.logo, "marca/logo.png");
+  assert.ok(existsSync(join(raiz, "painel", "marca", "logo.png")));
+  const svg = join(dir, "outra logo.svg");
+  writeFileSync(svg, "<svg xmlns='http://www.w3.org/2000/svg'/>");
+  r = gravarMarca({ nome: "X", cor_primaria: "#123456", logo: svg }, { raiz });
+  assert.equal(r.marca.logo, "marca/logo.svg");
+  assert.equal(existsSync(join(raiz, "painel", "marca", "logo.png")), false);
+});
+
+test("front continua estrito: só https ou marca/<nome>; caminho absoluto/espaço no config é rejeitado", () => {
+  for (const ruim of ["/Users/aluno/Downloads/Logo Silva.png", "marca/logo silva.png", "marca/../x.png"]) {
+    assert.equal(Marca.validar({ nome: "X", logo: ruim }).ok, false, ruim);
+  }
+});
