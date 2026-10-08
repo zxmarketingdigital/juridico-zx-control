@@ -40,7 +40,7 @@ test("validar: nome obrigatório, cor inválida pede de novo, default de cor com
 });
 
 test("validar: logo só png/jpg/svg/webp local relativo ou https; nada de data:, http, traversal", () => {
-  for (const ok of ["marca/logo.png", "https://exemplo.com/l.svg"]) assert.equal(Marca.validar({ nome: "X", logo: ok }).ok, true, ok);
+  for (const ok of ["marca/logo.png", "marca/logo-0123456789ab.png", "https://exemplo.com/l.svg"]) assert.equal(Marca.validar({ nome: "X", logo: ok }).ok, true, ok);
   for (const ruim of ["http://x.com/l.png", "data:image/png;base64,AAAA", "../segredo.png", "marca/logo.exe", "javascript:alert(1)", "/etc/passwd.png"]) {
     assert.equal(Marca.validar({ nome: "X", logo: ruim }).ok, false, ruim);
   }
@@ -74,11 +74,12 @@ test("gravarMarca: grava config, copia logo, normaliza e não usa a marca ZX", (
   writeFileSync(logo, PNG);
   const r = gravarMarca({ nome: "Silva & Associados", cor_primaria: "#1e3", cor_secundaria: "#0F172A", logo }, { raiz });
   assert.equal(r.ok, true, JSON.stringify(r.erros));
-  assert.ok(existsSync(join(raiz, "painel", "marca", "logo.png")));
+  assert.match(r.marca.logo, /^marca\/logo-[0-9a-f]{12}\.png$/);
+  assert.ok(existsSync(join(raiz, "painel", r.marca.logo)));
   const js = readFileSync(join(raiz, "painel", "marca.config.js"), "utf8");
   assert.match(js, /window\.ZX_MARCA = \{/);
   const cfg = JSON.parse(js.slice(js.indexOf("{"), js.lastIndexOf("}") + 1));
-  assert.deepEqual(cfg, { nome: "Silva & Associados", cor_primaria: "#11EE33", cor_secundaria: "#0F172A", logo: "marca/logo.png" });
+  assert.deepEqual(cfg, { nome: "Silva & Associados", cor_primaria: "#11EE33", cor_secundaria: "#0F172A", logo: r.marca.logo });
 });
 
 test("gravarMarca: campo inválido => ok=false e NADA é gravado", () => {
@@ -133,13 +134,15 @@ test("logo local: caminho absoluto com espaço/acento é aceito, copiado como ma
   writeFileSync(png, PNG);
   let r = gravarMarca({ nome: "X", cor_primaria: "#123456", logo: png }, { raiz });
   assert.equal(r.ok, true, JSON.stringify(r.erros));
-  assert.equal(r.marca.logo, "marca/logo.png");
-  assert.ok(existsSync(join(raiz, "painel", "marca", "logo.png")));
+  assert.match(r.marca.logo, /^marca\/logo-[0-9a-f]{12}\.png$/);
+  assert.ok(existsSync(join(raiz, "painel", r.marca.logo)));
+  const logoPng = r.marca.logo;
   const svg = join(dir, "outra logo.svg");
   writeFileSync(svg, "<svg xmlns='http://www.w3.org/2000/svg'/>");
   r = gravarMarca({ nome: "X", cor_primaria: "#123456", logo: svg }, { raiz });
-  assert.equal(r.marca.logo, "marca/logo.svg");
-  assert.equal(existsSync(join(raiz, "painel", "marca", "logo.png")), false);
+  assert.match(r.marca.logo, /^marca\/logo-[0-9a-f]{12}\.svg$/);
+  assert.equal(existsSync(join(raiz, "painel", logoPng)), false);
+  assert.deepEqual(readdirSync(join(raiz, "painel", "marca")), [r.marca.logo.split("/")[1]]);
 });
 
 test("front continua estrito: só https ou marca/<nome>; caminho absoluto/espaço no config é rejeitado", () => {
@@ -200,6 +203,7 @@ test("atômico: falha na cópia do logo preserva logo e config antigos", () => {
   writeFileSync(png, PNG);
   assert.equal(gravarMarca({ nome: "Antigo", cor_primaria: "#123456", logo: png }, { raiz }).ok, true);
   const cfgAntes = readFileSync(join(raiz, "painel", "marca.config.js"), "utf8");
+  const logoAntes = readdirSync(join(raiz, "painel", "marca"));
   const png2 = join(raiz, "b.png");
   writeFileSync(png2, PNG);
   chmodSync(png2, 0o000); // existe e tem tamanho, mas a cópia falha ao ler
@@ -209,16 +213,15 @@ test("atômico: falha na cópia do logo preserva logo e config antigos", () => {
   if (process.getuid && process.getuid() === 0) return; // root ignora chmod
   assert.ok(falhou);
   assert.equal(readFileSync(join(raiz, "painel", "marca.config.js"), "utf8"), cfgAntes);
-  assert.ok(existsSync(join(raiz, "painel", "marca", "logo.png")));
-  assert.deepEqual(readdirSync(join(raiz, "painel", "marca")), ["logo.png"]);
+  assert.deepEqual(readdirSync(join(raiz, "painel", "marca")), logoAntes);
   assert.deepEqual(readdirSync(join(raiz, "painel")).filter((f) => f.includes(".tmp-")), []);
 });
 
-test("front: logo local só aceita exatamente marca/logo.<ext>", () => {
+test("front: logo local só aceita marca/logo[-<12 hex>].<ext>", () => {
   for (const ok of ["marca/logo.png", "marca/logo.JPG", "marca/logo.webp", "marca/logo.svg", "marca/logo.jpeg"]) {
     assert.equal(Marca.validar({ nome: "X", cor_primaria: "#123456", logo: ok }).marca.logo, ok, ok);
   }
-  for (const ruim of ["img/qualquer.png", "marca/outro.png", "logo.png", "marca/sub/logo.png", "../marca/logo.png", "/etc/logo.png"]) {
+  for (const ruim of ["img/qualquer.png", "marca/outro.png", "logo.png", "marca/sub/logo.png", "../marca/logo.png", "/etc/logo.png", "marca/logo-xyz.png", "marca/logo-0123456789abc.png"]) {
     assert.notEqual(Marca.validar({ nome: "X", cor_primaria: "#123456", logo: ruim }).marca.logo, ruim, ruim);
   }
 });
@@ -261,4 +264,27 @@ test("temporários: nomes aleatórios e abertura exclusiva — symlink pré-plan
   assert.match(src, /randomBytes\(6\)/);
   assert.match(src, /COPYFILE_EXCL/);
   assert.match(src, /flag:\s*"wx"/);
+});
+
+test("config é pasta (não arquivo regular): recusa ANTES de trocar o logo; estado antigo preservado", () => {
+  const raiz = raizTemp();
+  const png = join(raiz, "l.png");
+  writeFileSync(png, PNG);
+  mkdirSync(join(raiz, "painel", "marca.config.js"));
+  assert.throws(() => gravarMarca({ nome: "X", cor_primaria: "#123456", logo: png }, { raiz }), /arquivo regular/);
+  assert.equal(existsSync(join(raiz, "painel", "marca")), false);
+});
+
+test("troca de logo: o config antigo continua apontando para um logo que existe até o rename do config (nome versionado)", () => {
+  const raiz = raizTemp();
+  const a = join(raiz, "a.png"); writeFileSync(a, PNG);
+  const r1 = gravarMarca({ nome: "X", cor_primaria: "#123456", logo: a }, { raiz });
+  const b = join(raiz, "b.png"); writeFileSync(b, Buffer.concat([PNG, Buffer.from("x")]));
+  const r2 = gravarMarca({ nome: "X", cor_primaria: "#123456", logo: b }, { raiz });
+  assert.notEqual(r1.marca.logo, r2.marca.logo); // logo novo nunca sobrescreve o nome do antigo
+});
+
+test("título: nome com $& é inserido literalmente", () => {
+  const src = readFileSync(join(RAIZ_PADRAO, "painel", "marca.js"), "utf8");
+  assert.match(src, /replace\("\{nome\}", function \(\) \{ return m\.nome; \}\)/);
 });

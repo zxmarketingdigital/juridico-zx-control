@@ -17,7 +17,7 @@
   var COR_PADRAO = "#D97706";           // âmbar ZX (fallback com aviso no setup)
   var ESCURO = "#0D0D0D";               // texto sobre a cor da marca / fundo base
   var BRANCO = "#FFFFFF";
-  var LOGO_LOCAL = /^marca\/logo\.(png|jpe?g|svg|webp)$/i;
+  var LOGO_LOCAL = /^marca\/logo(-[0-9a-f]{12})?\.(png|jpe?g|svg|webp)$/i;
   var LOGO_URL = /^https:\/\/[^\s"'<>()]+$/i;
   var NOME_MAX = 60;
 
@@ -147,7 +147,7 @@
     Array.prototype.forEach.call(doc.querySelectorAll("[data-marca='nome']"), function (n) { n.textContent = m.nome; });
     Array.prototype.forEach.call(doc.querySelectorAll("[data-marca='nome-sep']"), function (n) { n.textContent = " · " + m.nome; });
     Array.prototype.forEach.call(doc.querySelectorAll("title[data-marca-title]"), function (t) {
-      t.textContent = t.getAttribute("data-marca-title").replace("{nome}", m.nome);
+      t.textContent = t.getAttribute("data-marca-title").replace("{nome}", function () { return m.nome; });
     });
     if (m.logo) {
       var src = resolverLogo(m.logo, base);

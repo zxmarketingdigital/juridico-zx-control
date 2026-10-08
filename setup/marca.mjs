@@ -82,7 +82,8 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
     } else if (statSync(origem).size > LOGO_MAX_BYTES) {
       erros.push("logo: arquivo maior que 2 MB — reduza a imagem");
     } else {
-      const rel = `marca/logo${ext === ".jpeg" ? ".jpg" : ext}`;
+      // nome versionado: o config antigo continua apontando para o logo antigo até o rename final do config
+      const rel = `marca/logo-${randomBytes(6).toString("hex")}${ext === ".jpeg" ? ".jpg" : ext}`;
       logoParaValidar = rel;
       copiar = { origem, destino: join(painel, rel) };
     }
@@ -106,6 +107,7 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
   // 1) Nada é removido nem gravado antes de provar que o destino está DENTRO da raiz real:
   //    painel/, painel/marca/, o logo e o config não podem ser symlink (nem a raiz real escapar).
   garantirDestinoSeguro(raiz, [painel, destinoDir, arquivo, ...(copiar ? [copiar.destino] : [])]);
+  if (existsSync(arquivo) && !lstatSync(arquivo).isFile()) throw new Error("painel/marca.config.js existe e não é arquivo regular");
   mkdirSync(painel, { recursive: true });
   garantirDestinoSeguro(raiz, [painel]);
 
