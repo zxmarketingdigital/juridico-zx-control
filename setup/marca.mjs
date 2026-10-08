@@ -68,10 +68,11 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
   const painel = join(raiz, "painel");
   const destinoDir = join(painel, "marca");
 
+  entrada = { ...entrada, logo: typeof entrada.logo === "string" ? entrada.logo.trim() || undefined : entrada.logo };
   let logoParaValidar = entrada.logo;
   let copiar = null;
   if (entrada.logo && !/^https:\/\//i.test(String(entrada.logo))) {
-    const origem = resolve(expandirHome(String(entrada.logo).trim()));
+    const origem = resolve(expandirHome(String(entrada.logo)));
     const ext = extname(origem).toLowerCase();
     if (!EXT_OK.has(ext)) {
       erros.push("logo: use imagem png, jpg, svg ou webp (ou uma URL https)");
@@ -121,7 +122,7 @@ export function gravarMarca(entrada, { raiz = RAIZ_PADRAO } = {}) {
       // original do aluno (absoluto, com espaço, acentos) nunca chega ao front nem ao destino.
       if (!resolve(copiar.destino).startsWith(resolve(destinoDir) + "/")) throw new Error("destino da logo fora de painel/marca/");
       copyFileSync(copiar.origem, tmpLogo);
-      if (statSync(tmpLogo).size !== statSync(copiar.origem).size) throw new Error("cópia da logo incompleta");
+      if (statSync(tmpLogo).size > LOGO_MAX_BYTES || statSync(tmpLogo).size !== statSync(copiar.origem).size) throw new Error("cópia da logo incompleta");
     }
     writeFileSync(
       tmpConfig,

@@ -236,3 +236,10 @@ test("corSobre: >= 4.5:1 para TODA cor (varredura), inclusive #777777 que falha 
     assert.ok(cr(Marca.corSobre(h), h) >= 4.5, h);
   }
 });
+
+test("logo https com espaços nas pontas é tratado como URL, não como caminho", () => {
+  const raiz = raizTemp();
+  const r = gravarMarca({ nome: "X", cor_primaria: "#123456", logo: "  https://exemplo.com/logo.png " }, { raiz });
+  assert.equal(r.ok, true, JSON.stringify(r.erros));
+  assert.equal(r.marca.logo, "https://exemplo.com/logo.png");
+});
